@@ -142,34 +142,3 @@
       };
     }
 
-    /** 触发按钮：三种形态按可用宽度自适应（量法 measureFooterLane 与判定 resolveFooterSize /
-     * needsFooterWrap 都在 lib/footer-layout.mjs，构建时原样内联进 bundle，与测试同一份）。
-     *
-     * footer 槽是宿主 ui-sidebar 的一条不换行 flex 行（`.footerActions`），同槽条目之间
-     * 抢这条行。此前按①选择器白名单认「占用者是谁」②按 `[data-slot=...]` 槽元素内容被裁
-     * 判定，两条都已失效：锚点并不是本按钮——DSH 的 slot 出口是 ui-renderer 的
-     * `SlotOutlet`，一个 `display:contents` 外壳（所有条目都渲染在它内部、外壳自己没有
-     * 盒子：Chromium 实测 clientWidth/scrollWidth = 0/0、rect 全 0、父元素 children = 1），
-     * 于是「内容被裁」恒为 false、「同槽条目」恒为 0 个，判定在生产里恒不命中
-     * （#31 / #35 / #39 / #43 同一类问题的四次复发）。
-     *
-     * 现在只按布局事实判定，与「占用者是谁」无关：以本按钮自己的 ref 为锚点上溯到真正的
-     * flex 行，量「还剩多少宽度给我」（available = 行内容宽 − 同槽其它条目占位 − 行间距 −
-     * 行内边距）与「完整形态需要多宽」（needed，由按钮内一个脱离文档流的隐藏镜像量出，
-     * 与按钮当前形态无关，因此判定不会自我振荡）：
-     *   share — 放得下 → `flex: 1 1 auto` 与同槽条目共享一行（issue #31 的预期行为）；
-     *   icon  — 放不下 → 36×36 圆钮（图标保留，文字进 title / aria-label），绝不截断、
-     *           不遮挡、不动宿主布局；rail（wide=false）态同款；
-     *   row   — 换行容器 / 纵排容器（issue #25）/ 找不到可共享的行 → 整宽自占一行。
-     * 唯一的宿主写操作：连 36px 图标都放不下时（同槽有不可收缩的整宽条目）才把行换成
-     * `wrap`、自己独占一行（0.10.1 起对整宽占用者的既有处理），卸载时还原；该判定用
-     * 「不换行时能分到多少」的反事实口径，因此在「已注入 wrap → 空间仍不足」之间稳定。
-     * 样式对齐设置按钮（透明底、12px 圆角、16px 图标 + 文字、悬停浅底），图标用插件 logo。
-     */
-    /** 量「完整形态需要多宽」的隐藏镜像：脱离文档流 + visibility:hidden（仍参与布局计算）
-     * + max-content 宽，因此与按钮当前形态/宽度无关。 */
-    const FOOTER_PROBE_STYLE = {
-      position: "absolute", visibility: "hidden", pointerEvents: "none",
-      width: "max-content", display: "flex", alignItems: "center", gap: "8px",
-      fontSize: "14px", lineHeight: "22px", left: 0, top: 0,
-    };

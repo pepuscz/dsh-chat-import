@@ -1,3 +1,5 @@
+The import action is under **More → Import sessions**, using the native menu styling.
+
 > Native remote companion: `frontendOnly: true` loads the UI without registering local import tools or routes; requires a connector that forwards authenticated `/api-import/` requests.
 
 > Fork security defaults: authenticated POST-only import panel; system-prompt imports and model-tool injection disabled by default. Runtime dependency fzstd is pinned to 0.1.1. No sessions are imported on installation. See [FORK.md](FORK.md).

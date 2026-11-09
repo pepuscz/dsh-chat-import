@@ -1,3 +1,6 @@
+- Move Import sessions to the native More menu.
+- 将导入会话入口移至原生“更多”菜单。
+
 ## Fork — unreleased
 
 - Add frontend-only desktop companion mode; remote importer UI stays hidden on Local.

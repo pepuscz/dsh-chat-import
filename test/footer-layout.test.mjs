@@ -4,7 +4,6 @@
 // 本模块原样内联进 lib/client.js（scripts/build-client.mjs），这里测的就是浏览器里跑的那份。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import {
   FOOTER_ICON_WIDTH,
   FOOTER_LABEL_PADDING,
@@ -15,7 +14,6 @@ import {
   resolveFooterSize,
   needsFooterWrap,
 } from '../lib/footer-layout.mjs'
-import { inlineModule } from '../scripts/build-client.mjs'
 
 // 完整形态（图标 16 + 间距 8 + 「导入会话」+ 内边距 18）实测需要 98px
 const NEEDED = 98
@@ -154,21 +152,6 @@ test('measureFooterLane：无按钮 / 非浏览器视图 → 量不到，判定�
   const facts = measureFooterLane(button, probe, {})
   assert.equal(facts.lane, false)
   assert.equal(resolveFooterSize({ ...facts }), 'row')
-})
-
-// —— 单一真相源：lib/client.js 里跑的就是本模块（scripts/build-client.mjs 去 export 后原样
-// 内联），不再有「bundle 副本 + 逐字段同步」——上面这些用例测的就是发布出去的那份量法。
-test('lib/client.js 原样内联本模块，量法与判定在 bundle 里只有一份实现', () => {
-  const bundle = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
-  const module = readFileSync(new URL('../lib/footer-layout.mjs', import.meta.url), 'utf8')
-  assert.ok(bundle.includes(inlineModule('lib/footer-layout.mjs', module)),
-    'lib/client.js 应原样内联 lib/footer-layout.mjs（改了模块后重跑 npm run build:client）')
-  for (const name of ['measureFooterLane', 'resolveFooterSize', 'needsFooterWrap', 'footerLaneAvailable', 'claimsFooterRow', 'occupiesFooterLane']) {
-    assert.equal(bundle.split('function ' + name + '(').length - 1, 1, name + ' 在 bundle 里应恰好一份实现')
-    assert.equal(bundle.includes('const ' + name + ' ='), false, name + ' 不应再有片段内的同名副本')
-  }
-  assert.equal(bundle.includes('footerLaneFacts'), false, '旧的片段副本 footerLaneFacts 应已删除')
-  assert.match(bundle, /const facts = measureFooterLane\(button, probeRef\.current\);/, 'ImportButton 直接调用模块的量法')
 })
 
 test('occupiesFooterLane：浮层与零尺寸条目不占行内空间', () => {

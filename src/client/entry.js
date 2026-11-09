@@ -1,155 +1,26 @@
-    function ImportButton({ wide }) {
+    function ImportButton({ onDismiss }) {
       const t = useTranslate();
-      const rail = wide === false;
-      const label = t("trigger.label");
-      const buttonRef = useRef(null);
-      const probeRef = useRef(null);
       const [visible, setVisible] = useState(cachedSidebarButton);
       useEffect(() => {
         const listener = (val) => setVisible(val);
         sidebarButtonListeners.add(listener);
-        // 0.1.7 走客户端 configForms，旧宿主走 fenced 路由（loadPrefsView 分流）。
-        loadPrefsView()
-          .then((d) => {
-            if (d && d.ok && d.value && typeof d.value.sidebarButton === "boolean") {
-              setSidebarButton(d.value.sidebarButton);
-            }
-          })
-          .catch(() => {});
+        loadPrefsView().then((d) => {
+          if (d && d.ok && typeof d.value?.sidebarButton === "boolean") {
+            setSidebarButton(d.value.sidebarButton);
+          }
+        }).catch(() => {});
         return () => { sidebarButtonListeners.delete(listener); };
       }, []);
-      // 形态：'share' / 'icon' / 'row'（判定见内联的 lib/footer-layout.mjs）。首帧按共享一行
-      // 渲染，mount 后立刻按实测宽度修正（两种形态同高，不留可见跳动）。
-      const [mode, setMode] = useState("share");
-      // 观测面只有「本按钮 + 它所在的那条渲染行」：ResizeObserver 跟行/按钮尺寸变化
-      // （侧边栏拖宽、同槽条目增减导致的重新分配），MutationObserver 只看这条行的子树
-      // （条目挂载/卸载、宿主或其它插件改 style/class）。不再观察整个文档——那会在每次
-      // 消息流式渲染时触发强制布局。判定结果做等值比较，避免观察自身改动造成重渲染循环。
-      // 用 layout effect 而非 effect：首帧就按实测宽度落形态，不留一帧被挤压的样子。
-      useLayoutEffect(() => {
-        const button = buttonRef.current;
-        if (!button) return undefined;
-        let observed = null; // 正在观测的宿主行
-        let injected = null; // 我们注入 wrap 的行（null = 未注入）
-        let restore = ""; // 注入前的 inline flex-wrap
-        let ro = null;
-        let mo = null;
-        const check = () => {
-          const facts = measureFooterLane(button, probeRef.current);
-          const next = resolveFooterSize({ rail, ...facts });
-          // 连 36px 图标都放不下（同槽有不可收缩的整宽条目）→ 把行换成 wrap、自己独占
-          // 一行（0.10.1 起对整宽占用者的既有处理），让 footArea 高度随内容增长。判定用
-          // 「不换行时能分到多少」的反事实口径，因此在已注入 wrap 的状态下仍成立、不来回
-          // 抖；占用者消失后 available 回升即还原。只写我们自己注入的那一次，其它插件
-          // 注入的 wrap 不碰（写入 inline style 会触发 MutationObserver 再跑 check，但
-          // `injected !== facts.row` 守卫使其不重复赋值、不形成循环）。
-          if (facts.row && needsFooterWrap({ rail, ...facts })) {
-            if (injected !== facts.row) {
-              if (injected) injected.style.flexWrap = restore;
-              injected = facts.row;
-              restore = injected.style.flexWrap || "";
-              injected.style.flexWrap = "wrap";
-            }
-          } else if (injected) {
-            injected.style.flexWrap = restore;
-            injected = null;
-          }
-          setMode((prev) => (prev === next ? prev : next));
-          if (facts.row === observed) return;
-          if (ro) ro.disconnect();
-          if (mo) mo.disconnect();
-          ro = null;
-          mo = null;
-          observed = facts.row;
-          if (!observed) return;
-          if (typeof ResizeObserver === "function") {
-            ro = new ResizeObserver(check);
-            ro.observe(observed);
-            ro.observe(button);
-          }
-          if (typeof MutationObserver === "function") {
-            mo = new MutationObserver(check);
-            mo.observe(observed, {
-              childList: true, subtree: true, attributes: true,
-              attributeFilter: ["style", "class", "hidden"],
-            });
-          }
-        };
-        check();
-        window.addEventListener("resize", check);
-        return () => {
-          window.removeEventListener("resize", check);
-          if (ro) ro.disconnect();
-          if (mo) mo.disconnect();
-          if (injected) injected.style.flexWrap = restore;
-        };
-      }, [rail, label]);
-      // 图标形态：rail（收起）态与宽态被挤到放不下文字时同款——36×36 圆钮、单图标
-      // 18px 居中，文字保留在 title / aria-label 里（绝不截断、不遮挡、不动宿主布局）。
-      const iconOnly = mode === "icon";
-      // 视觉逐项对齐侧边栏「设置」按钮（ui-settings-general 的
-      // SettingsRoot.module.css .trigger）：宽态 height 42px、padding
-      // 0 10px 0 8px、gap 8px、圆角 12px、14px/400 lh22、overflow hidden、
-      // 16×16 图标；图标形态 36×36、圆角 50%、单图标 18px 居中。颜色/悬停走
-      // 侧边栏同一 CSS 变量（--dsw-alias-label-primary /
-      // --dsw-alias-interactive-bg-hover），明暗主题下与设置按钮一致。
-      const baseStyle = {
-        boxSizing: "border-box",
-        display: "flex", alignItems: "center",
-        justifyContent: iconOnly ? "center" : undefined,
-        gap: iconOnly ? "0" : "8px",
-        background: "transparent", border: "none",
-        color: "var(--dsw-alias-label-primary)",
-        fontFamily: "inherit",
-        borderRadius: iconOnly ? "50%" : "12px",
-        padding: iconOnly ? "0" : "0 10px 0 8px",
-        height: iconOnly ? "36px" : "42px",
-        fontSize: "14px", lineHeight: "22px",
-        cursor: "pointer",
-        overflow: "hidden",
-      };
-      // 行内尺寸按形态三分派：
-      // - share：flex: 1 1 auto + width: auto + min-width: 0，与同槽其它入口（如
-      //   dsh-web-all 的「检查更新/远程访问」）共享一行、按比例分配宽度（issue #31）。
-      //   早期用 width: 100% + flex: 0 0 auto 独占整行，把同槽条目挤出 280px 侧栏被
-      //   overflow: hidden 裁剪；仅本插件一个入口时 flex-grow 仍撑满整行，视觉一致。
-      // - icon：36×36 且 flex: 0 0 auto（不收缩），同槽条目再多也压不没图标。
-      // - row：整宽自占一行——wrap 容器（tokenledger 注入或本插件注入）里各整宽条目
-      //   各自成行、order 决定堆叠，auto 宽 + grow 的条目会挤到同一行破坏堆叠；纵排
-      //   容器（issue #25）的 flex-basis 沿主轴=高度解析，grow: 1 会把按钮整高拉伸
-      //   压住同槽按钮 → 同样保持 flex: 0 0 auto + width: 100%。
-      const triggerStyle = {
-        ...baseStyle,
-        ...(iconOnly
-          ? { flex: "0 0 auto", width: FOOTER_ICON_WIDTH + "px", minWidth: FOOTER_ICON_WIDTH + "px" }
-          : mode === "share"
-            ? { flex: "1 1 auto", width: "auto", minWidth: 0 }
-            : { flex: "0 0 auto", width: "100%" }),
-        whiteSpace: "nowrap",
-      };
-      const hoverBg = "var(--dsw-alias-interactive-bg-hover)";
       if (!visible) return null;
-      return h("button", {
-        ref: buttonRef,
-        style: triggerStyle, title: t("trigger.title"),
-        "aria-label": t("trigger.label"),
-        onClick: () => {
-          // 打开「导入会话」右侧栏 tab：tab 在右栏内展开、对话区保留（接入侧栏接口
-          // 而非覆盖主区）。openNativeImportTab 每次点击重证 sidebarRight 服务
-          //（无挂载会话 / HMR 换服务时返回 false，本次点击无动作——依赖门槛保证
-          // 受支持版本服务恒存在，无回落链）。
+      const { MenuItemButton } = require("@deepseek-ai/dsh-client-ui-primitives");
+      return h(MenuItemButton, {
+        icon: h(LogoIcon, { size: 16 }),
+        title: t("trigger.title"),
+        onSelect: () => {
+          onDismiss?.();
           openNativeImportTab();
         },
-        onMouseEnter: (e) => { e.currentTarget.style.background = hoverBg; },
-        onMouseLeave: (e) => { e.currentTarget.style.background = "transparent"; },
-      },
-        h(LogoIcon, { size: iconOnly ? 18 : 16 }),
-        !iconOnly && label,
-        // 完整形态宽度镜像：绝对定位 + hidden，但仍参与布局计算——判定用的 needed
-        // 取自它，因此与按钮当前形态无关（缩成图标后仍能算出「文字形态需要多宽」）。
-        h("span", { ref: probeRef, "aria-hidden": true, style: FOOTER_PROBE_STYLE },
-          h(LogoIcon, { size: 16 }),
-          h("span", null, label)));
+      }, t("trigger.label"));
     }
 
     const name = "import-claude";
@@ -214,9 +85,9 @@
       // 裸 slots.register 要求槽在 apply 期已被 ui-sidebar 声明，advanced shell 下
       // 声明时序不保证先于本插件 -> fiber 抛错、renderer boot 判失败（白屏）。
       // slots.inject 挂起等声明就绪（官方 ui-cordis / dsh-community-market 同款）。
-      ctx.slots.inject("sidebar.footer.action", () =>
+      ctx.slots.inject("sidebar.panellist.actions", () =>
         ctx.slots.register(
-          { name: "sidebar.footer.action", id: "chat-import", order: 0 },
+          { name: "sidebar.panellist.actions", id: "chat-import", order: 0 },
           ImportButton,
         ));
       // 落点 Toast 的挂载点：官方 shell.overlay（与宿主自己的 toast 同一个槽，例如

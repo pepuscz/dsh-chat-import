@@ -412,3 +412,7 @@
 Exact webServer routes bypass the standard /api connection handler. The fork wraps
 panel registration with connection.admit and requires POST before reading bodies or
 performing IO. Missing admission support fails closed; CLI conversion is unaffected.
+
+
+### Fork: More menu entry
+The frontend companion registers in `sidebar.panellist.actions` and uses the host MenuItemButton. Selecting it dismisses More and opens the existing import pane; it no longer occupies a sidebar footer row.
