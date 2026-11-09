@@ -1,5 +1,8 @@
 ## Fork — unreleased
 
+- Add frontend-only desktop companion mode; remote importer UI stays hidden on Local.
+- 新增仅前端客户端模式；Local 模式隐藏远程导入界面。
+
 - Security: require host connection admission and POST for panel routes.
 - Defaults: disable system prompt imports and model tool injection.
 - Pin fzstd to 0.1.1; correct macOS Goose test expectations.

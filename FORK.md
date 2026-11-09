@@ -20,3 +20,7 @@ expectation now accounts for macOS without changing runtime behavior.
 
 Keep upstream remote and merge reviewed releases. Pin deployment by full commit
 and archive SHA-256. Never store transcripts, tokens, or machine configuration here.
+
+For the native remote connector, frontendOnly disables all local host behavior;
+the client UI appears only when a remote host is selected. The connector admits
+and forwards only the explicit /api-import/ route family to that selected host.
