@@ -406,3 +406,9 @@
   - 隐藏与归档共用一张忽略表，语义只靠 `reason` 区分；`/ignores` 的输出要多认一种 reason，文档必须写清「可撤销」与「不可逆」的差别。
   - 删源依赖平台能力：Windows 需要 `powershell.exe`，其余平台只是把文件挪进插件自己的 trash 目录（不删除，所以仍占空间）。
 - **重审条件**：宿主提供带鉴权的面板接口，或提供官方的「移入回收站」服务时，第 2 条可放宽到「用户显式选中的根」，第 4 条改走宿主服务。若将来 UI 真要支持自定义根扫描并允许删源，扫描请求必须携带独立的能力凭据，而不是复用 `path`。
+
+## Fork: panel admission
+
+Exact webServer routes bypass the standard /api connection handler. The fork wraps
+panel registration with connection.admit and requires POST before reading bodies or
+performing IO. Missing admission support fails closed; CLI conversion is unaffected.

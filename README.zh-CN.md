@@ -1,3 +1,5 @@
+> 分支安全默认值：导入面板要求宿主认证，仅接受 POST；默认不导入系统提示词、不注入模型工具。fzstd 固定为 0.1.1。安装不会自动导入会话。详见 [FORK.md](FORK.md)。
+
 <div align="center">
 
 <img src="./assets/dci-promo.png" alt="DSH Chat Import 宣传图" width="100%" />

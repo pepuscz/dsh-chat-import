@@ -107,7 +107,7 @@ test('REQ-41 /api-import/sessions handler：合成夹具经 discoverSessions 返
   apply(ctx)
   const route = webRoutes.find((r) => r.path === '/api-import/sessions')
   const invoke = async (body) => {
-    const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+    const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
     const res = {
       status: null, headers: null, body: null,
       writeHead(s, h) { this.status = s; this.headers = h },
@@ -164,7 +164,7 @@ test('REQ-41 /api-import/sessions handler：qoder 来源映射（SOURCE_FORMAT �
   const { ctx, webRoutes } = makeCtx(tree)
   apply(ctx)
   const route = webRoutes.find((r) => r.path === '/api-import/sessions')
-  const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify({ source: 'qoder', path: root }) } }
+  const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify({ source: 'qoder', path: root }) } }
   const res = { status: null, headers: null, body: null, writeHead(s, h) { this.status = s; this.headers = h }, end(b) { this.body = b } }
   await route.handler(req, res)
   const data = JSON.parse(res.body)
@@ -191,7 +191,7 @@ test('REQ-41 /api-import/sessions handler：分页（offset/limit + total）+ �
   apply(ctx)
   const route = webRoutes.find((r) => r.path === '/api-import/sessions')
   const invoke = async (body) => {
-    const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+    const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
     const res = { status: null, headers: null, body: null, writeHead(s, h) { this.status = s; this.headers = h }, end(b) { this.body = b } }
     await route.handler(req, res)
     return { res, data: JSON.parse(res.body) }
@@ -238,7 +238,7 @@ test('REQ-41 /api-import/sessions 流式：后台扫描 + after 游标轮询（�
   apply(ctx)
   const route = webRoutes.find((r) => r.path === '/api-import/sessions')
   const invoke = async (body) => {
-    const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+    const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
     const res = { status: null, headers: null, body: null, writeHead(s, h) { this.status = s; this.headers = h }, end(b) { this.body = b } }
     await route.handler(req, res)
     return { res, data: JSON.parse(res.body) }
@@ -307,7 +307,7 @@ test('REQ-41 /api-import/sessions 流式：超大库按 STREAM_CHUNK 分块交�
   apply(ctx)
   const route = webRoutes.find((r) => r.path === '/api-import/sessions')
   const invoke = async (body) => {
-    const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+    const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
     const res = { status: null, headers: null, body: null, writeHead(s, h) { this.status = s; this.headers = h }, end(b) { this.body = b } }
     await route.handler(req, res)
     return { res, data: JSON.parse(res.body) }
@@ -338,7 +338,7 @@ test('REQ-41 /api-import/sessions 流式：超大库按 STREAM_CHUNK 分块交�
 
 test('REQ-41 /api-import/prefs：settings 缺席回退默认；在场时读/写走 fenced 路由（revision 冲突保护）', async () => {
   const invoke = async (route, body) => {
-    const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+    const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
     const res = { status: null, headers: null, body: null, writeHead(s, h) { this.status = s; this.headers = h }, end(b) { this.body = b } }
     await route.handler(req, res)
     return { res, data: JSON.parse(res.body) }
@@ -432,7 +432,7 @@ test('REQ-55 面板发现 + scan_discover：归档目标 importStatus=archived�
   // 面板数据源：/api-import/sessions 返回 archived（客户端据此显示「已归档」+ 导入按钮）
   const route = webRoutes.find((r) => r.path === '/api-import/sessions')
   const invoke = async (body) => {
-    const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+    const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
     const res = { status: null, headers: null, body: null, writeHead(s, h) { this.status = s; this.headers = h }, end(b) { this.body = b } }
     await route.handler(req, res)
     return { res, data: JSON.parse(res.body) }

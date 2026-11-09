@@ -95,7 +95,7 @@ export function kimiCodeWire(recs, tsBase = 1786888277773) {
 export function kimiCodeEv(type, data = {}) { return { type, ...data } }
 
 export async function invokeImportRoute(route, body) {
-  const req = { async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
+  const req = { method: 'POST', async *[Symbol.asyncIterator]() { yield JSON.stringify(body) } }
   const res = {
     status: null, headers: null, body: null,
     writeHead(s, h) { this.status = s; this.headers = h },

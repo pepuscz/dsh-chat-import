@@ -257,14 +257,14 @@ test('路径解析：GOOSE_PATH_ROOT 仅绝对路径生效，三平台默认根�
   const home = join('home', 'u')
   const p = join   // 本机平台口径（跨平台断言用 posix.join/win32.join 显式指定）
   assert.equal(gooseDataDir(home, { GOOSE_PATH_ROOT: join('rel', 'root') }, process.platform),
-    p(home, '.local', 'share', 'goose'))
+    process.platform === 'darwin' ? p(home, 'Library', 'Application Support', 'Block', 'goose') : p(home, '.local', 'share', 'goose'))
   assert.equal(gooseDataDir(home, { GOOSE_PATH_ROOT: 'D:\\g' }, 'win32'), 'D:\\g\\data')
   assert.equal(gooseDataDir('/h/u', { GOOSE_PATH_ROOT: '/mnt/d/g' }, 'linux'), '/mnt/d/g/data')
-  assert.equal(gooseSessionsDir(home, {}, process.platform), p(home, '.local', 'share', 'goose', 'sessions'))
+  assert.equal(gooseSessionsDir(home, {}, process.platform), process.platform === 'darwin' ? p(home, 'Library', 'Application Support', 'Block', 'goose', 'sessions') : p(home, '.local', 'share', 'goose', 'sessions'))
   assert.equal(gooseSessionsDir('/h/u', {}, 'darwin'), '/h/u/Library/Application Support/Block/goose/sessions')
   assert.equal(gooseSessionsDir('C:\\Users\\u', { APPDATA: 'C:\\Users\\u\\AppData\\Roaming' }, 'win32'),
     'C:\\Users\\u\\AppData\\Roaming\\Block\\goose\\data\\sessions')
-  assert.equal(gooseDefaultDbPath(home, {}, process.platform), p(home, '.local', 'share', 'goose', 'sessions', 'sessions.db'))
+  assert.equal(gooseDefaultDbPath(home, {}, process.platform), process.platform === 'darwin' ? p(home, 'Library', 'Application Support', 'Block', 'goose', 'sessions', 'sessions.db') : p(home, '.local', 'share', 'goose', 'sessions', 'sessions.db'))
 })
 
 // ---- import_goose 集成（真实 SQLite 临时库） ----

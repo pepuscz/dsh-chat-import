@@ -1,3 +1,6 @@
 - insert:
     - id: import-claude
       name: dsh-chat-import
+      config:
+        importSystemPrompt: false
+        injectTools: off

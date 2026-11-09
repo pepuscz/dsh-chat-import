@@ -1,3 +1,5 @@
+> Fork security defaults: authenticated POST-only import panel; system-prompt imports and model-tool injection disabled by default. Runtime dependency fzstd is pinned to 0.1.1. No sessions are imported on installation. See [FORK.md](FORK.md).
+
 <div align="center">
 
 <img src="./assets/dci-promo.png" alt="DSH Chat Import" width="100%" />

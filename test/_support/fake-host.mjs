@@ -359,6 +359,7 @@ export function makeCtx(tree = {}, opts = {}) {
     webServer: web,
     tools,
     get(service) {
+      if (service === 'connection') return services.connection ?? { admit: () => ({ peer: {} }) }
       if (service === 'workspaceRegistry') return workspaceRegistry
       if (service === 'sessionPersistence') return hostPersistence
       if (service === 'webServer') return opts.noWebServer ? undefined : web

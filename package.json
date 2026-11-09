@@ -124,7 +124,7 @@
     "eslint": "^10.8.1"
   },
   "dependencies": {
-    "fzstd": "^0.1.1"
+    "fzstd": "0.1.1"
   },
   "overrides": {
     "js-yaml": "4.3.2"

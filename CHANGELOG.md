@@ -1,3 +1,10 @@
+## Fork — unreleased
+
+- Security: require host connection admission and POST for panel routes.
+- Defaults: disable system prompt imports and model tool injection.
+- Pin fzstd to 0.1.1; correct macOS Goose test expectations.
+- 安全：面板路由要求宿主认证和 POST；默认关闭系统提示词导入与工具注入；固定 fzstd 版本并修正 macOS 测试。
+
 # Changelog
 
 All notable changes to `dsh-chat-import` are documented here, newest first.
